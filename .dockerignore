@@ -1,4 +1,2 @@
-vendor/
-pkg/generated/
-auth
 Dockerfile
+loxone-homekit

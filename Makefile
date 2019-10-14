@@ -6,6 +6,9 @@ WORKDIR := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 .PHONY: init
 init:
 	export GO111MODULE=on
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.17.1
+	go get -u github.com/onsi/ginkgo/ginkgo
+	go get -u github.com/modocache/gover
 	go mod download
 
 .PHONY: lint
@@ -19,6 +22,10 @@ build:
 .PHONY: test
 test:
 	go test $(shell go list ./... | grep -v vendor/ | grep -v /hack | grep -v generated)
+
+.PHONY: cover
+cover:
+	$(GOPATH)/bin/gover . coverage.txt
 
 .PHONY: format
 format:

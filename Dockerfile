@@ -9,7 +9,6 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
-RUN make init
 RUN make build
 
 FROM alpine as release

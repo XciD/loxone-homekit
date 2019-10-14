@@ -15,13 +15,6 @@ import (
 )
 
 func init() {
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.TraceLevel)
-
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-	})
-
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetConfigType("json")
@@ -31,6 +24,17 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.SetOutput(os.Stdout)
+	level, err := log.ParseLevel(viper.GetString("log"))
+	if err != nil {
+		panic(err)
+	}
+	log.SetLevel(level)
+
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 }
 
 func main() {
