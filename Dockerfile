@@ -20,6 +20,5 @@ RUN apk update \
     && update-ca-certificates 2>/dev/null || true
 
 COPY --from=builder /go/src/loxone-homekit/build/loxone-homekit /loxone-homekit
-COPY config.json /
 
 ENTRYPOINT ["/loxone-homekit"]
