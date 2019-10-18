@@ -14,7 +14,7 @@ type LoxoneSwitch struct {
 	*characteristic.On
 }
 
-func NewLoxoneSwitch(config ComponentConfig, control *loxone.Control, lox loxone.LoxoneInterface) *Component {
+func NewLoxoneSwitch(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
 	component := &LoxoneSwitch{
 		Component: newComponent(config, control, lox),
 	}

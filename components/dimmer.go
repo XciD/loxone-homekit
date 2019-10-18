@@ -17,7 +17,7 @@ type LoxoneDimmer struct {
 	*characteristic.Brightness
 }
 
-func NewLoxoneDimmer(config ComponentConfig, control *loxone.Control, lox loxone.LoxoneInterface) *Component {
+func NewLoxoneDimmer(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
 	component := &LoxoneDimmer{
 		Component: newComponent(config, control, lox),
 	}

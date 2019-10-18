@@ -16,7 +16,7 @@ type LoxoneJalousie struct {
 	down bool
 }
 
-func NewJalousie(config ComponentConfig, control *loxone.Control, lox loxone.LoxoneInterface) *Component {
+func NewJalousie(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
 	component := &LoxoneJalousie{
 		Component: newComponent(config, control, lox),
 	}

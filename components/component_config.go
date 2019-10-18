@@ -20,14 +20,14 @@ type ComponentConfig struct {
 type Component struct {
 	*accessory.Accessory
 	Logger *log.Entry
-	loxone.LoxoneInterface
+	loxone.WebsocketInterface
 	*loxone.Control
 	uuid string
 }
 
-func newComponent(config ComponentConfig, control *loxone.Control, loxone loxone.LoxoneInterface) *Component {
+func newComponent(config ComponentConfig, control *loxone.Control, loxone loxone.WebsocketInterface) *Component {
 	c := &Component{}
-	c.LoxoneInterface = loxone
+	c.WebsocketInterface = loxone
 	c.Control = control
 
 	c.Logger = log.WithFields(log.Fields{"type": config.LoxoneType, "id": config.ID, "name": config.Name})
@@ -44,7 +44,7 @@ func newComponent(config ComponentConfig, control *loxone.Control, loxone loxone
 
 func (c *Component) command(command string) {
 	c.Logger.Infof("command %s", command)
-	status, err := c.LoxoneInterface.SendCommand(fmt.Sprintf("jdev/sps/io/%s/%s", c.uuid, command), nil)
+	status, err := c.WebsocketInterface.SendCommand(fmt.Sprintf("jdev/sps/io/%s/%s", c.uuid, command), nil)
 	if err != nil {
 		log.Error(err)
 	}
@@ -53,12 +53,12 @@ func (c *Component) command(command string) {
 
 func (c *Component) addHook(stateName string, callback func(*events.Event)) {
 	// TODO Check if state exist
-	c.LoxoneInterface.AddHook(c.Control.States[stateName].(string), callback)
+	c.WebsocketInterface.AddHook(c.Control.States[stateName].(string), callback)
 }
 
 func (c *Component) addDebugHook(stateName string) {
 	// TODO Check if state exist
-	c.LoxoneInterface.AddHook(c.Control.States[stateName].(string), c.debugHook(stateName))
+	c.WebsocketInterface.AddHook(c.Control.States[stateName].(string), c.debugHook(stateName))
 }
 
 func (c *Component) debugHook(name string) func(event *events.Event) {
@@ -67,7 +67,7 @@ func (c *Component) debugHook(name string) func(event *events.Event) {
 	}
 }
 
-func CreateComponent(config ComponentConfig, control *loxone.Control, lox loxone.LoxoneInterface) *Component {
+func CreateComponent(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
 	switch config.LoxoneType {
 	case "Switch":
 		return NewLoxoneSwitch(config, control, lox)

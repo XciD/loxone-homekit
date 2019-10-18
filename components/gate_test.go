@@ -15,7 +15,7 @@ func TestGate(t *testing.T) {
 		"active":       "uuid-active",
 	})
 
-	dimmer := NewGate(*fixture.ComponentConfig, fixture.Control, fixture.LoxoneInterface)
+	dimmer := NewGate(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
 
 	characteristics := dimmer.GetServices()[1].GetCharacteristics()
 	currentDoorState := characteristics[0]

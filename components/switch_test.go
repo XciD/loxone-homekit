@@ -9,7 +9,7 @@ import (
 func TestSwitch(t *testing.T) {
 	fixture := NewFixture("test-name", "test-uuid", "Switch", map[string]interface{}{"active": "uuid-active"})
 
-	dimmer := NewLoxoneSwitch(*fixture.ComponentConfig, fixture.Control, fixture.LoxoneInterface)
+	dimmer := NewLoxoneSwitch(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
 
 	characteristics := dimmer.GetServices()[1].GetCharacteristics()
 	on := characteristics[0]

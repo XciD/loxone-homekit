@@ -15,7 +15,7 @@ func TestJalousie(t *testing.T) {
 		"position": "uuid-position",
 	})
 
-	dimmer := NewJalousie(*fixture.ComponentConfig, fixture.Control, fixture.LoxoneInterface)
+	dimmer := NewJalousie(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
 
 	characteristics := dimmer.GetServices()[1].GetCharacteristics()
 	currentPosition := characteristics[0]

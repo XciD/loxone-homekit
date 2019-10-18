@@ -14,7 +14,7 @@ type LoxoneGate struct {
 	active int
 }
 
-func NewGate(config ComponentConfig, control *loxone.Control, lox loxone.LoxoneInterface) *Component {
+func NewGate(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
 	component := &LoxoneGate{
 		Component: newComponent(config, control, lox),
 	}
