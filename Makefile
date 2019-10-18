@@ -21,7 +21,7 @@ build:
 
 .PHONY: test
 test:
-	go test $(shell go list ./... | grep -v vendor/ | grep -v /hack | grep -v generated)
+	$(GOPATH)/bin/ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --progress --compilers=2
 
 .PHONY: cover
 cover:
