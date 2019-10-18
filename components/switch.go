@@ -1,82 +1,45 @@
 package components
 
 import (
-	"fmt"
-
-	"github.com/prometheus/common/log"
-
 	"github.com/XciD/loxone-ws/events"
 
 	"github.com/XciD/loxone-ws"
-	"github.com/brutella/hc/accessory"
 	"github.com/brutella/hc/characteristic"
 	"github.com/brutella/hc/service"
 )
 
 type LoxoneSwitch struct {
-	*accessory.Accessory
-	service *SwitchService
-	loxone  *loxone.Loxone
-	uuid    string
-	state   bool
-}
-
-type SwitchService struct {
+	*Component
 	*service.Service
-	On *characteristic.On
+	*characteristic.On
 }
 
-func NewLoxoneSwitch(component Component, control *loxone.Control, lox *loxone.Loxone) *LoxoneSwitch {
-	acc := LoxoneSwitch{}
-	info := accessory.Info{
-		Name:         control.Name,
-		Manufacturer: "Loxone",
-		SerialNumber: control.UUIDAction,
+func NewLoxoneSwitch(config ComponentConfig, control *loxone.Control, lox loxone.LoxoneInterface) *Component {
+	component := &LoxoneSwitch{
+		Component: newComponent(config, control, lox),
 	}
-	acc.Accessory = accessory.New(info, accessory.AccessoryType(component.Type))
-	acc.service = newLightService()
 
-	acc.AddService(acc.service.Service)
+	component.Service = service.New(service.TypeLightbulb)
+	component.AddService(component.Service)
 
-	acc.uuid = control.UUIDAction
-	acc.loxone = lox
-	acc.state = true
+	component.On = characteristic.NewOn()
+	component.AddCharacteristic(component.On.Characteristic)
 
-	acc.service.On.OnValueRemoteUpdate(func(on bool) {
-		if on {
-			acc.command("on")
-		} else {
-			acc.command("off")
-		}
-	})
+	component.On.OnValueRemoteUpdate(component.remoteUpdate)
 
-	acc.service.On.OnValueGet(func() interface{} {
-		return acc.state
-	})
-
-	lox.AddHook(control.States["active"].(string), func(event *events.Event) {
-		acc.state = event.Value == 1
-		acc.service.On.SetValue(acc.state)
-	})
-
-	return &acc
+	// Add status updates
+	component.addHook("active", component.activeHook)
+	return component.Component
 }
 
-func newLightService() *SwitchService {
-	svc := SwitchService{}
-	svc.Service = service.New(service.TypeLightbulb)
-
-	svc.On = characteristic.NewOn()
-	svc.AddCharacteristic(svc.On.Characteristic)
-
-	return &svc
+func (l *LoxoneSwitch) activeHook(event *events.Event) {
+	l.On.SetValue(event.Value == 1)
 }
 
-func (l *LoxoneSwitch) command(command string) {
-	log.Infof("[%s] Stopping", l.Info.Name.Value)
-	status, err := l.loxone.SendCommand(fmt.Sprintf("jdev/sps/io/%s/%s", l.uuid, command), nil)
-	if err != nil {
-		log.Error(err)
+func (l *LoxoneSwitch) remoteUpdate(on bool) {
+	if on {
+		l.command("on")
+	} else {
+		l.command("off")
 	}
-	log.Infof("[%s] Result %d", l.Info.Name.Value, status.Code)
 }
