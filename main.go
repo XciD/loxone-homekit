@@ -8,7 +8,6 @@ import (
 	"github.com/brutella/hc/accessory"
 
 	"github.com/XciD/loxone-ws"
-	"github.com/XciD/loxone-ws/events"
 	"github.com/brutella/hc"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -78,8 +77,6 @@ func main() {
 	}
 
 	log.Info("Register Events OK")
-
-	_ = make(map[string]chan *events.Event)
 
 	accessories := make([]*accessory.Accessory, 0)
 

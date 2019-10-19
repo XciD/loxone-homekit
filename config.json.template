@@ -1,4 +1,10 @@
 {
+  "loxone": {
+    "host": "",
+    "user": "",
+    "password": ""
+  },
+  "pin": "11223344",
   "log": "INFO",
   "components": [
     {
