@@ -7,11 +7,11 @@ import (
 )
 
 func TestDimmer(t *testing.T) {
-	fixture := NewFixture("test-name", "test-uuid", "EIBDimmer", map[string]interface{}{"position": "uuid-position"})
+	fixture := NewFixture("test-name", "10516e85-0239-2320-ffffb7fe2005e936", "EIBDimmer", map[string]interface{}{"position": "uuid-position"})
 
-	dimmer := NewLoxoneDimmer(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
+	dimmer := NewLoxoneDimmer(fixture.Factory, *fixture.ComponentConfig)
 
-	characteristics := dimmer.GetServices()[1].GetCharacteristics()
+	characteristics := dimmer[0].GetServices()[1].GetCharacteristics()
 	on := characteristics[0]
 	brigtness := characteristics[1]
 
@@ -29,16 +29,16 @@ func TestDimmer(t *testing.T) {
 	// Shutdown from client
 	on.UpdateValueFromConnection(false, TestConn)
 
-	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/test-uuid/off")
+	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/off")
 
 	// LightOn from client
 	on.UpdateValueFromConnection(true, TestConn)
 
-	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/test-uuid/on")
+	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/on")
 
 	// Brigtness to 50
 	brigtness.UpdateValueFromConnection(50, TestConn)
 
-	assert.Equal(t, fixture.GetCommands()[2], "jdev/sps/io/test-uuid/50")
+	assert.Equal(t, fixture.GetCommands()[2], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/50")
 
 }

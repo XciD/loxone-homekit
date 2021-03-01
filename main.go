@@ -5,57 +5,51 @@ import (
 	"os"
 	"strings"
 
-	"github.com/brutella/hc/accessory"
-
 	"github.com/XciD/loxone-ws"
 	"github.com/brutella/hc"
-	log "github.com/sirupsen/logrus"
+	"github.com/brutella/hc/accessory"
+	"github.com/brutella/hc/log"
+	"github.com/mdp/qrterminal/v3"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func init() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
-	viper.SetConfigType("json")
-	viper.SetEnvPrefix("APP")
+	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
-	log.SetOutput(os.Stdout)
-	level, err := log.ParseLevel(viper.GetString("log"))
+	level, err := logrus.ParseLevel(viper.GetString("log"))
 	if err != nil {
 		panic(err)
 	}
-	log.SetLevel(level)
+	logrus.SetLevel(level)
 
-	log.SetFormatter(&log.TextFormatter{
+	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 		PadLevelText:  true,
 	})
+
+	log.Debug.Enable()
 }
 
 func main() {
-	// Parse arguments
-	var configComponents []components.ComponentConfig
-	err := viper.UnmarshalKey("components", &configComponents)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// Open socket
 	lox, err := loxone.New(
 		viper.GetString("loxone.host"),
+		viper.GetInt("loxone.port"),
 		viper.GetString("loxone.user"),
 		viper.GetString("loxone.password"),
 	)
 
 	if err != nil {
-		log.Error(err)
-		return
+		logrus.Fatal(err)
 	}
 
 	defer lox.Close()
@@ -63,54 +57,52 @@ func main() {
 	// Get config
 	loxoneConfig, err := lox.GetConfig()
 	if err != nil {
-		log.Error(err)
-		return
+		logrus.Fatal(err)
 	}
 
-	log.Info("Get Config OK")
+	logrus.Info("Get Config OK")
 
 	// Register events
-	err = lox.RegisterEvents()
-	if err != nil {
-		log.Error(err)
-		return
+	if err := lox.RegisterEvents(); err != nil {
+		logrus.Fatal(err)
 	}
 
-	log.Info("Register Events OK")
+	logrus.Info("Register Events OK")
 
-	accessories := make([]*accessory.Accessory, 0)
+	accessories := components.GetAccessories(lox, loxoneConfig)
 
-	for _, config := range configComponents {
-		if control, ok := loxoneConfig.Controls[config.ID]; ok {
-			component := components.CreateComponent(config, control, lox)
-			if component != nil {
-				accessories = append(accessories, component.Accessory)
-			}
-		}
-	}
+	logrus.Infof("Found %d accessories", len(accessories))
 
 	info := accessory.Info{
-		Name:         "Loxone",
+		Name:         loxoneConfig.MsInfo["projectName"].(string),
+		SerialNumber: loxoneConfig.MsInfo["serialNr"].(string),
 		Manufacturer: "Loxone",
+		Model:        loxoneConfig.MsInfo["msName"].(string),
 	}
 
 	bridge := accessory.NewBridge(info)
 
-	t, err := hc.NewIPTransport(hc.Config{Pin: viper.GetString("pin")}, bridge.Accessory, accessories...)
+	t, err := hc.NewIPTransport(hc.Config{
+		Pin:         viper.GetString("homekit.pin"),
+		Port:        viper.GetString("homekit.port"),
+		StoragePath: viper.GetString("homekit.storagePath"),
+	}, bridge.Accessory, accessories...)
 
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
+
+	uri, _ := t.XHMURI()
+	qrterminal.Generate(uri, qrterminal.L, os.Stdout)
 
 	stop := make(chan bool)
 
 	hc.OnTermination(func() {
-		log.Info("Stopping")
+		logrus.Info("Stopping")
 		close(stop)
 	})
-
 	go t.Start()
-	log.Info("Start reading events")
+	logrus.Info("Start reading events")
 	go lox.PumpEvents(stop)
 
 	<-stop

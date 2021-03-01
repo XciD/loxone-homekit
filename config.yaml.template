@@ -1,0 +1,16 @@
+log: DEBUG
+loxone:
+  host:
+  port:
+  user:
+  password:
+homekit:
+  pin: 11223341
+  storagePath: config
+  port: 42000
+autodiscover:
+  switch: true
+  jalousie: true
+  alarm: true
+  gate: true
+  EIBDimmer: true

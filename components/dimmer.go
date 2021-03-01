@@ -3,9 +3,10 @@ package components
 import (
 	"strconv"
 
+	"github.com/brutella/hc/accessory"
+
 	"github.com/XciD/loxone-ws/events"
 
-	"github.com/XciD/loxone-ws"
 	"github.com/brutella/hc/characteristic"
 	"github.com/brutella/hc/service"
 )
@@ -17,9 +18,9 @@ type LoxoneDimmer struct {
 	*characteristic.Brightness
 }
 
-func NewLoxoneDimmer(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
+func NewLoxoneDimmer(f *Factory, config ComponentConfig) []*Component {
 	component := &LoxoneDimmer{
-		Component: newComponent(config, control, lox),
+		Component: f.newComponent(config, accessory.TypeLightbulb),
 	}
 
 	component.Service = service.New(service.TypeLightbulb)
@@ -38,10 +39,10 @@ func NewLoxoneDimmer(config ComponentConfig, control *loxone.Control, lox loxone
 
 	// Add status updates
 	component.addHook("position", component.brightnessHook)
-	return component.Component
+	return []*Component{component.Component}
 }
 
-func (l *LoxoneDimmer) brightnessHook(event *events.Event) {
+func (l *LoxoneDimmer) brightnessHook(event events.Event) {
 	l.Brightness.SetValue(int(event.Value))
 	if l.Brightness.GetValue() > 0 {
 		l.On.SetValue(true)

@@ -11,3 +11,9 @@
 Loxone Homekit Integration in go
 
 Work in progress
+
+
+```
+docker build -t homekit
+docker run -v config.yaml:/config.yaml -v /config:/config --net=host -it homekit
+```
