@@ -9,15 +9,15 @@ import (
 )
 
 func TestJalousie(t *testing.T) {
-	fixture := NewFixture("test-name", "test-uuid", "Jalousie", map[string]interface{}{
+	fixture := NewFixture("test-name", "10516e85-0239-2320-ffffb7fe2005e936", "Jalousie", map[string]interface{}{
 		"up":       "uuid-up",
 		"down":     "uuid-down",
 		"position": "uuid-position",
 	})
 
-	dimmer := NewJalousie(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
+	jalousie := NewJalousie(fixture.Factory, *fixture.ComponentConfig)[0]
 
-	characteristics := dimmer.GetServices()[1].GetCharacteristics()
+	characteristics := jalousie.GetServices()[1].GetCharacteristics()
 	currentPosition := characteristics[0]
 	targetPosition := characteristics[1]
 	positionState := characteristics[2]
@@ -55,7 +55,7 @@ func TestJalousie(t *testing.T) {
 	fixture.TriggerEvent("uuid-down", 1)
 	fixture.TriggerEvent("uuid-position", 0.3)
 
-	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/test-uuid/FullDown")
+	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/FullDown")
 	assert.Equal(t, positionState.GetValue(), characteristic.PositionStateDecreasing)
 	assert.Equal(t, currentPosition.GetValue(), 70)
 	assert.Equal(t, targetPosition.GetValue(), 0)
@@ -67,7 +67,7 @@ func TestJalousie(t *testing.T) {
 	fixture.TriggerEvent("uuid-down", 0)
 	fixture.TriggerEvent("uuid-position", 0.3)
 
-	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/test-uuid/stop")
+	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/stop")
 	assert.Equal(t, positionState.GetValue(), characteristic.PositionStateStopped)
 	assert.Equal(t, currentPosition.GetValue(), 70)
 	assert.Equal(t, targetPosition.GetValue(), 70)
@@ -79,7 +79,7 @@ func TestJalousie(t *testing.T) {
 	fixture.TriggerEvent("uuid-down", 0)
 	fixture.TriggerEvent("uuid-position", 0.7)
 
-	assert.Equal(t, fixture.GetCommands()[2], "jdev/sps/io/test-uuid/ManualPosition/90")
+	assert.Equal(t, fixture.GetCommands()[2], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/ManualPosition/90")
 	assert.Equal(t, positionState.GetValue(), characteristic.PositionStateIncreasing)
 	assert.Equal(t, currentPosition.GetValue(), 30)
 	assert.Equal(t, targetPosition.GetValue(), 10)

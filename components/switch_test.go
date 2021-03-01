@@ -7,11 +7,13 @@ import (
 )
 
 func TestSwitch(t *testing.T) {
-	fixture := NewFixture("test-name", "test-uuid", "Switch", map[string]interface{}{"active": "uuid-active"})
+	fixture := NewFixture("test-name", "10516e85-0239-2320-ffffb7fe2005e936", "Switch", map[string]interface{}{"active": "uuid-active"})
 
-	dimmer := NewLoxoneSwitch(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
+	fixture.ComponentConfig.CategoryType = "lights"
 
-	characteristics := dimmer.GetServices()[1].GetCharacteristics()
+	loxoneSwitch := NewLoxoneSwitch(fixture.Factory, *fixture.ComponentConfig)[0]
+
+	characteristics := loxoneSwitch.GetServices()[1].GetCharacteristics()
 	on := characteristics[0]
 
 	// Trigger down from WS
@@ -26,13 +28,13 @@ func TestSwitch(t *testing.T) {
 	// Shutdown from client
 	on.UpdateValueFromConnection(true, TestConn)
 
-	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/test-uuid/on")
+	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/on")
 	assert.Equal(t, on.GetValue(), true)
 
 	// LightOn from client
 	on.UpdateValueFromConnection(false, TestConn)
 
-	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/test-uuid/off")
+	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/off")
 	assert.Equal(t, on.GetValue(), false)
 
 }

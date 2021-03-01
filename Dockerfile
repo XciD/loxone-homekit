@@ -1,11 +1,9 @@
-FROM golang:1.12-stretch as builder
+FROM golang:1.16 as builder
 
 ENV GO111MODULE on
 WORKDIR /go/src/loxone-homekit
 
-COPY Makefile .
-COPY go.mod .
-COPY go.sum .
+COPY Makefile go.mod go.sum ./
 RUN go mod download
 
 COPY . .
@@ -20,5 +18,4 @@ RUN apk update \
     && update-ca-certificates 2>/dev/null || true
 
 COPY --from=builder /go/src/loxone-homekit/build/loxone-homekit /loxone-homekit
-
 ENTRYPOINT ["/loxone-homekit"]

@@ -2,8 +2,8 @@ package components
 
 import (
 	"github.com/XciD/loxone-ws/events"
+	"github.com/brutella/hc/accessory"
 
-	"github.com/XciD/loxone-ws"
 	"github.com/brutella/hc/characteristic"
 	"github.com/brutella/hc/service"
 )
@@ -14,9 +14,14 @@ type LoxoneSwitch struct {
 	*characteristic.On
 }
 
-func NewLoxoneSwitch(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
+func NewLoxoneSwitch(f *Factory, config ComponentConfig) []*Component {
+	if config.CategoryType != "lights" {
+		// Only handles light for now.
+		return nil
+	}
+
 	component := &LoxoneSwitch{
-		Component: newComponent(config, control, lox),
+		Component: f.newComponent(config, accessory.TypeLightbulb),
 	}
 
 	component.Service = service.New(service.TypeLightbulb)
@@ -29,10 +34,10 @@ func NewLoxoneSwitch(config ComponentConfig, control *loxone.Control, lox loxone
 
 	// Add status updates
 	component.addHook("active", component.activeHook)
-	return component.Component
+	return []*Component{component.Component}
 }
 
-func (l *LoxoneSwitch) activeHook(event *events.Event) {
+func (l *LoxoneSwitch) activeHook(event events.Event) {
 	l.On.SetValue(event.Value == 1)
 }
 

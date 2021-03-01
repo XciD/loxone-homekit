@@ -8,16 +8,16 @@ import (
 )
 
 func TestGate(t *testing.T) {
-	fixture := NewFixture("test-name", "test-uuid", "Gate", map[string]interface{}{
+	fixture := NewFixture("test-name", "10516e85-0239-2320-ffffb7fe2005e936", "Gate", map[string]interface{}{
 		"position":     "uuid-position",
 		"preventOpen":  "uuid-preventOpen",
 		"preventClose": "uuid-preventClose",
 		"active":       "uuid-active",
 	})
 
-	dimmer := NewGate(*fixture.ComponentConfig, fixture.Control, fixture.FakeWebsocket)
+	gate := NewGate(fixture.Factory, *fixture.ComponentConfig)[0]
 
-	characteristics := dimmer.GetServices()[1].GetCharacteristics()
+	characteristics := gate.GetServices()[1].GetCharacteristics()
 	currentDoorState := characteristics[0]
 	targetDoorState := characteristics[1]
 	currentPosition := characteristics[3]
@@ -53,7 +53,7 @@ func TestGate(t *testing.T) {
 	fixture.TriggerEvent("uuid-active", 0)
 	fixture.TriggerEvent("uuid-position", 0.3)
 
-	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/test-uuid/stop")
+	assert.Equal(t, fixture.GetCommands()[0], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/stop")
 	assert.Equal(t, currentDoorState.GetValue(), characteristic.CurrentDoorStateStopped, "Door should stop")
 	assert.Equal(t, targetDoorState.GetValue(), characteristic.TargetDoorStateOpen, "Target should equal open")
 	assert.Equal(t, currentPosition.GetValue(), 70)
@@ -65,7 +65,7 @@ func TestGate(t *testing.T) {
 	fixture.TriggerEvent("uuid-active", -1)
 	fixture.TriggerEvent("uuid-position", 0.3)
 
-	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/test-uuid/close")
+	assert.Equal(t, fixture.GetCommands()[1], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/close")
 	assert.Equal(t, currentDoorState.GetValue(), characteristic.CurrentDoorStateClosing, "Door should be closing")
 	assert.Equal(t, targetDoorState.GetValue(), characteristic.TargetDoorStateClosed, "Target should equal closed")
 	assert.Equal(t, currentPosition.GetValue(), 70)
@@ -78,7 +78,7 @@ func TestGate(t *testing.T) {
 	fixture.TriggerEvent("uuid-active", 1)
 	fixture.TriggerEvent("uuid-position", 0.3)
 
-	assert.Equal(t, fixture.GetCommands()[2], "jdev/sps/io/test-uuid/open")
+	assert.Equal(t, fixture.GetCommands()[2], "jdev/sps/io/10516e85-0239-2320-ffffb7fe2005e936/open")
 	assert.Equal(t, currentDoorState.GetValue(), characteristic.CurrentDoorStateOpening, "Door should be opening")
 	assert.Equal(t, targetDoorState.GetValue(), characteristic.TargetDoorStateOpen, "Target should equal to open")
 	assert.Equal(t, currentPosition.GetValue(), 70)

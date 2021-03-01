@@ -14,26 +14,27 @@ type fixture struct {
 	*ComponentConfig
 	*loxone.Control
 	*test.FakeWebsocket
+	*Factory
 }
 
 func NewFixture(name, id, loxoneType string, states map[string]interface{}) *fixture {
 	fixture := &fixture{}
 
 	fixture.ComponentConfig = &ComponentConfig{
-		ID:         id,
-		Name:       name,
-		Type:       1,
-		LoxoneType: loxoneType,
+		ID:          id,
+		Name:        name,
+		ControlType: loxoneType,
+		Control: &loxone.Control{
+			Name:       name,
+			Type:       loxoneType,
+			UUIDAction: id,
+			States:     states,
+		},
 	}
 
-	fixture.Control = &loxone.Control{
-		Name:       name,
-		Type:       loxoneType,
-		UUIDAction: id,
-		States:     states,
-	}
-
-	fixture.FakeWebsocket = test.NewFakeWebsocket()
+	websocket := test.NewFakeWebsocket()
+	fixture.FakeWebsocket = websocket.(*test.FakeWebsocket)
+	fixture.Factory = &Factory{Loxone: fixture.FakeWebsocket}
 
 	return fixture
 }

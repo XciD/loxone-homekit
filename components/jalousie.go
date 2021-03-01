@@ -3,7 +3,8 @@ package components
 import (
 	"fmt"
 
-	"github.com/XciD/loxone-ws"
+	"github.com/brutella/hc/accessory"
+
 	"github.com/XciD/loxone-ws/events"
 	"github.com/brutella/hc/characteristic"
 	"github.com/brutella/hc/service"
@@ -16,9 +17,9 @@ type LoxoneJalousie struct {
 	down bool
 }
 
-func NewJalousie(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
+func NewJalousie(f *Factory, config ComponentConfig) []*Component {
 	component := &LoxoneJalousie{
-		Component: newComponent(config, control, lox),
+		Component: f.newComponent(config, accessory.TypeWindowCovering),
 	}
 
 	component.WindowCovering = service.NewWindowCovering()
@@ -35,7 +36,7 @@ func NewJalousie(config ComponentConfig, control *loxone.Control, lox loxone.Web
 	component.addHook("down", component.downHook)
 	component.addHook("position", component.positionHook)
 
-	return component.Component
+	return []*Component{component.Component}
 }
 
 func (l *LoxoneJalousie) getState() int {
@@ -85,19 +86,19 @@ func (l *LoxoneJalousie) onPositionStateGet() interface{} {
 	return l.getState()
 }
 
-func (l *LoxoneJalousie) upHook(event *events.Event) {
+func (l *LoxoneJalousie) upHook(event events.Event) {
 	l.up = event.Value == 1
 	l.Logger.Infof("Updating state up to %t", l.up)
 	l.setState(l.getState())
 }
 
-func (l *LoxoneJalousie) downHook(event *events.Event) {
+func (l *LoxoneJalousie) downHook(event events.Event) {
 	l.down = event.Value == 1
 	l.Logger.Infof("Updating state down to %t", l.down)
 	l.setState(l.getState())
 }
 
-func (l *LoxoneJalousie) positionHook(event *events.Event) {
+func (l *LoxoneJalousie) positionHook(event events.Event) {
 	l.CurrentPosition.SetValue(int(100 - (event.Value * 100)))
 
 	state := l.getState()

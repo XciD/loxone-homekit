@@ -1,8 +1,8 @@
 package components
 
 import (
-	"github.com/XciD/loxone-ws"
 	"github.com/XciD/loxone-ws/events"
+	"github.com/brutella/hc/accessory"
 	"github.com/brutella/hc/characteristic"
 	"github.com/brutella/hc/service"
 )
@@ -14,9 +14,9 @@ type LoxoneGate struct {
 	active int
 }
 
-func NewGate(config ComponentConfig, control *loxone.Control, lox loxone.WebsocketInterface) *Component {
+func NewGate(f *Factory, config ComponentConfig) []*Component {
 	component := &LoxoneGate{
-		Component: newComponent(config, control, lox),
+		Component: f.newComponent(config, accessory.TypeGarageDoorOpener),
 	}
 
 	component.GarageDoorOpener = service.NewGarageDoorOpener()
@@ -39,7 +39,7 @@ func NewGate(config ComponentConfig, control *loxone.Control, lox loxone.Websock
 	component.addDebugHook("preventOpen")
 	component.addDebugHook("preventClose")
 
-	return component.Component
+	return []*Component{component.Component}
 }
 
 func (l *LoxoneGate) getState() int {
@@ -87,7 +87,7 @@ func (l *LoxoneGate) onTargetDoorStateRemoteUpdate(i int) {
 		l.command("close")
 	}
 }
-func (l *LoxoneGate) positionHook(event *events.Event) {
+func (l *LoxoneGate) positionHook(event events.Event) {
 	position := int(100 - (event.Value * 100))
 	l.CurrentPosition.SetValue(position)
 
@@ -96,7 +96,7 @@ func (l *LoxoneGate) positionHook(event *events.Event) {
 	l.setState(state)
 }
 
-func (l *LoxoneGate) activeHook(event *events.Event) {
+func (l *LoxoneGate) activeHook(event events.Event) {
 	l.active = int(event.Value)
 	state := l.getState()
 	l.checkTarget(state)
