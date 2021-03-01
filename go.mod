@@ -3,7 +3,7 @@ module loxone-homekit
 go 1.16
 
 require (
-	github.com/XciD/loxone-ws v0.0.0-20210301192403-6d754b43f0a5
+	github.com/XciD/loxone-ws v0.0.0-20210301200603-d4cbbff92141
 	github.com/brutella/hc v1.2.4
 	github.com/magiconair/properties v1.8.0
 	github.com/mdp/qrterminal/v3 v3.0.0
