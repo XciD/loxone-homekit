@@ -14,6 +14,7 @@ Work in progress
 
 
 ```
-docker build -t homekit
-docker run -v config.yaml:/config.yaml -v /config:/config --net=host -it homekit
+cp config.yaml.template config.yaml
+# Edit the config.yaml file with your loxone informations
+docker run -v $(pwd)/config.yaml:/config.yaml -v $(pwd)/config:/config --net=host -it xcid/loxone-homekit:latest
 ```
